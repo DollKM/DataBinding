@@ -25,8 +25,31 @@ public enum DataBindAction
 public class DataBind : SingletonMono<DataBind>
 {
 
-    DictionaryEX<IBindData, DictionaryEX<Component, DataEmitHandler>> cacheWithDatas = new((k) => new DictionaryEX<Component, DataEmitHandler>());
-    DictionaryEX<Component, HashSet<IBindData>> cacheWithComps = new((k) => new HashSet<IBindData>());
+    Dictionary<IBindData, Dictionary<Component, DataEmitHandler>> cacheWithDatas = new();
+    Dictionary<Component, HashSet<IBindData>> cacheWithComps = new();
+
+    bool _pauseEmiting = false;
+    public bool PauseEmiting
+    {
+        get => _pauseEmiting;
+        set
+        {
+            if (_pauseEmiting != value)
+            {
+                _pauseEmiting = value;
+                if (!_pauseEmiting)
+                {
+                    foreach (var data in cacheEmits)
+                    {
+                        Emit(data, DataBindAction.Init);
+                    }
+                    cacheEmits.Clear();
+                }
+            }
+        }
+    }
+
+    HashSet<IBindData> cacheEmits = new HashSet<IBindData>();
 
     public void Bind<DataT, TComp>(DataT Ddata, TComp Dcomp, Action<TComp, DataT, DataBindAction> Dacion) where TComp : Component where DataT : IBindData
     {
@@ -34,11 +57,21 @@ public class DataBind : SingletonMono<DataBind>
         {
             return;
         }
-        cacheWithDatas[Ddata][Dcomp] = (comp, data, action) =>
+        if (!cacheWithDatas.TryGetValue(Ddata, out var comps))
+        {
+            comps = new Dictionary<Component, DataEmitHandler>();
+            cacheWithDatas[Ddata] = comps;
+        }
+        comps[Dcomp] = (comp, data, action) =>
         {
             Dacion?.Invoke(comp as TComp, (DataT)data, action);
         };
-        cacheWithComps[Dcomp].Add(Ddata);
+        if (!cacheWithComps.TryGetValue(Dcomp, out var datas))
+        {
+            datas = new HashSet<IBindData>();
+            cacheWithComps[Dcomp] = datas;
+        }
+        datas.Add(Ddata);
         Dacion(Dcomp, (DataT)Ddata, DataBindAction.Init);
     }
 
@@ -47,6 +80,11 @@ public class DataBind : SingletonMono<DataBind>
     HashSet<IBindData> currentDatas = new HashSet<IBindData>();
     public void Emit(IBindData data, DataBindAction action)
     {
+        if (PauseEmiting)
+        {
+            cacheEmits.Add(data);
+            return;
+        }
         bool isRemove = false;
         if (currentDatas.Contains(data))
         {
@@ -88,10 +126,13 @@ public class DataBind : SingletonMono<DataBind>
         {
             foreach (var data in datas)
             {
-                cacheWithDatas[data].Remove(comp);
-                if (cacheWithDatas[data].Count == 0)
+                if (cacheWithDatas.TryGetValue(data, out var comps))
                 {
-                    cacheWithDatas.Remove(data);
+                    comps.Remove(comp);
+                    if (comps.Count == 0)
+                    {
+                        cacheWithDatas.Remove(data);
+                    }
                 }
             }
             cacheWithComps.Remove(comp);
@@ -104,10 +145,13 @@ public class DataBind : SingletonMono<DataBind>
         {
             foreach (var comp in comps)
             {
-                cacheWithComps[comp.Key].Remove(data);
-                if (cacheWithComps[comp.Key].Count == 0)
+                if (cacheWithComps.TryGetValue(comp.Key, out var datas))
                 {
-                    cacheWithComps.Remove(comp.Key);
+                    datas.Remove(data);
+                    if (datas.Count == 0)
+                    {
+                        cacheWithComps.Remove(comp.Key);
+                    }
                 }
             }
             cacheWithDatas.Remove(data);
@@ -126,10 +170,13 @@ public class DataBind : SingletonMono<DataBind>
                 //组件已经被释放，相关的数据检查一下绑定组件的数量，没有的话就也清空
                 foreach (var data in pair.Value)
                 {
-                    cacheWithDatas[data].Remove(pair.Key);
-                    if (cacheWithDatas[data].Count == 0)
+                    if (cacheWithDatas.TryGetValue(data, out var comps))
                     {
-                        cacheWithDatas.Remove(data);
+                        comps.Remove(pair.Key);
+                        if (comps.Count == 0)
+                        {
+                            cacheWithDatas.Remove(data);
+                        }
                     }
                 }
                 removedComps.Add(pair.Key);

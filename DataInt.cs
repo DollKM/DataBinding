@@ -20,6 +20,18 @@ public class DataInt : Data<int>
         return _value == value;
     }
 
+    public void SetWithMax(int value, int max)
+    {
+        if (value > max)
+        {
+            Set(max);
+        }
+        else
+        {
+            Set(value);
+        }
+    }
+
     public void AddSelf(int value)
     {
         Set(_value + value);
@@ -43,6 +55,36 @@ public class DataInt : Data<int>
         }
     }
 
+    public bool AddSelfWithMax(int value, int max, out int outside)
+    {
+        if (_value + value >= max)
+        {
+            outside = _value + value - max;
+            Set(max);
+            return true;
+        }
+        else
+        {
+            outside = 0;
+            Set(_value + value);
+            return false;
+        }
+    }
+    public bool AddSelfWithLoop(int value, int max)
+    {
+        int p = _value + value;
+        if (p >= max)
+        {
+            Set(p - max);
+            return true;
+        }
+        else
+        {
+            Set(p);
+            return false;
+        }
+    }
+
     public bool SubSelfWithMin(int value, int min)
     {
         if (_value - value <= min)
@@ -53,6 +95,21 @@ public class DataInt : Data<int>
         else
         {
             Set(_value - value);
+            return false;
+        }
+    }
+
+    public bool SubSelfWithLoop(int value, int max)
+    {
+        int p = _value - value;
+        if (p < 0)
+        {
+            Set(max + p);
+            return true;
+        }
+        else
+        {
+            Set(p);
             return false;
         }
     }

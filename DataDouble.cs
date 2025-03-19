@@ -5,35 +5,35 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 
-public class DataFloat : Data<float>
+public class DataDouble : Data<double>
 {
-    public DataFloat(float value) : base(value)
+    public DataDouble(double value) : base(value)
     {
     }
 
-    public DataFloat()
+    public DataDouble()
     {
     }
 
 
 
-    public override bool Compare(float value)
+    public override bool Compare(double value)
     {
         return _value == value;
     }
 
     // 重载加减乘除
-    public void AddSelf(float value)
+    public void AddSelf(double value)
     {
         Set(_value + value);
     }
 
-    public void SubSelf(float value)
+    public void SubSelf(double value)
     {
         Set(_value - value);
     }
 
-    public bool AddSelfWithMax(float value, float max)
+    public bool AddSelfWithMax(double value, double max)
     {
         if (_value + value >= max)
         {
@@ -47,7 +47,7 @@ public class DataFloat : Data<float>
         }
     }
 
-    public bool SubSelfWithMin(float value, float min)
+    public bool SubSelfWithMin(double value, double min)
     {
         if (_value - value <= min)
         {
@@ -60,26 +60,19 @@ public class DataFloat : Data<float>
             return false;
         }
     }
-
-    public void MultySelf(float value)
-    {
-        Set(_value * value);
-    }
-
-
-    public static DataFloat operator ++(DataFloat data)
+    public static DataDouble operator ++(DataDouble data)
     {
         data.Set(data._value + 1);
         return data;
     }
 
-    public static DataFloat operator --(DataFloat data)
+    public static DataDouble operator --(DataDouble data)
     {
         data.Set(data._value - 1);
         return data;
     }
 
-    public void Bind<TComp>(TComp comp, Action<TComp, DataFloat, DataBindAction> action) where TComp : UnityEngine.Component
+    public void Bind<TComp>(TComp comp, Action<TComp, DataDouble, DataBindAction> action) where TComp : UnityEngine.Component
     {
         DataBind.I.Bind(this, comp, action);
     }

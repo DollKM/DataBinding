@@ -1,39 +1,35 @@
 
 using System;
+using Invokes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
-
-public class DataFloat : Data<float>
+public class DataLong : Data<long>
 {
-    public DataFloat(float value) : base(value)
+    public DataLong(long value) : base(value)
     {
     }
 
-    public DataFloat()
+    public DataLong()
     {
     }
 
-
-
-    public override bool Compare(float value)
+    public override bool Compare(long value)
     {
         return _value == value;
     }
 
-    // 重载加减乘除
-    public void AddSelf(float value)
+    public void AddSelf(long value)
     {
         Set(_value + value);
     }
 
-    public void SubSelf(float value)
+    public void SubSelf(long value)
     {
         Set(_value - value);
     }
-
-    public bool AddSelfWithMax(float value, float max)
+    public bool AddSelfWithMax(long value, long max)
     {
         if (_value + value >= max)
         {
@@ -47,7 +43,7 @@ public class DataFloat : Data<float>
         }
     }
 
-    public bool SubSelfWithMin(float value, float min)
+    public bool SubSelfWithMin(long value, long min)
     {
         if (_value - value <= min)
         {
@@ -60,26 +56,21 @@ public class DataFloat : Data<float>
             return false;
         }
     }
+    // 重载加减乘除
 
-    public void MultySelf(float value)
+    public static DataLong operator ++(DataLong data)
     {
-        Set(_value * value);
-    }
-
-
-    public static DataFloat operator ++(DataFloat data)
-    {
-        data.Set(data._value + 1);
+        data.AddSelf(1);
         return data;
     }
 
-    public static DataFloat operator --(DataFloat data)
+    public static DataLong operator --(DataLong data)
     {
-        data.Set(data._value - 1);
+        data.SubSelf(1);
         return data;
     }
 
-    public void Bind<TComp>(TComp comp, Action<TComp, DataFloat, DataBindAction> action) where TComp : UnityEngine.Component
+    public void Bind<TComp>(TComp comp, Action<TComp, DataLong, DataBindAction> action) where TComp : UnityEngine.Component
     {
         DataBind.I.Bind(this, comp, action);
     }

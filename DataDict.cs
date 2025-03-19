@@ -71,6 +71,11 @@ public class DataDict<TKey, TData> : Data<Dictionary<TKey, TData>>
         return _value.TryGetValue(key, out value);
     }
 
+    public List<TData> FindAll(Func<TData, bool> match)
+    {
+        return _value.FindAll(match);
+    }
+
     public int Count
     {
         get
