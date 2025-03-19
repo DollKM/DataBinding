@@ -16,8 +16,6 @@ public class DataList<TData> : Data<List<TData>>
 {
     public delegate void DataListOnChanged(List<TData> list, int index);
 
-    public int Count => _value.Count;
-
     [NonSerialized]
     new public DataListOnChanged willChanged;
     public DataList()
@@ -36,26 +34,6 @@ public class DataList<TData> : Data<List<TData>>
         _value = token.ToObject<List<TData>>(serializer);
     }
 
-    public TData this[int idx]
-    {
-        get
-        {
-            if (idx >= 0 && idx < _value.Count)
-            {
-                return _value[idx];
-            }
-            return default;
-        }
-        set
-        {
-            if (idx >= 0 && idx < _value.Count)
-            {
-                _value[idx] = value;
-                DataBind.I.Emit(this, DataBindAction.Update);
-            }
-        }
-    }
-
     public void Add(TData data)
     {
         index = _value.Count;
@@ -72,18 +50,6 @@ public class DataList<TData> : Data<List<TData>>
         DataBind.I.Emit(this, DataBindAction.Add);
     }
     public int index = -1;
-
-    public void Swap(int src, int dst)
-    {
-        // 交换元素位置
-        if (src >= 0 && src < _value.Count && dst >= 0 && dst < _value.Count)
-        {
-            TData temp = _value[src];
-            _value[src] = _value[dst];
-            _value[dst] = temp;
-            DataBind.I.Emit(this, DataBindAction.Update);
-        }
-    }
 
     public void Remove(TData data)
     {
@@ -114,19 +80,6 @@ public class DataList<TData> : Data<List<TData>>
         willChanged?.Invoke(_value, index);
         _value.Clear();
         DataBind.I.Emit(this, DataBindAction.Clear);
-    }
-
-    public void AddRange(List<TData> list)
-    {
-        index = _value.Count;
-        willChanged?.Invoke(_value, index);
-        _value.AddRange(list);
-        DataBind.I.Emit(this, DataBindAction.Add);
-    }
-
-    public bool Contains(TData data)
-    {
-        return _value.Contains(data);
     }
 
     public void Bind<TComp>(TComp comp, Action<TComp, DataList<TData>, TData, DataBindAction> action) where TComp : UnityEngine.Component

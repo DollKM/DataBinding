@@ -43,21 +43,6 @@ public class DataInt : Data<int>
         }
     }
 
-    public bool AddSelfWithLoop(int value, int max)
-    {
-        int p = _value + value;
-        if (p >= max)
-        {
-            Set(p - max);
-            return true;
-        }
-        else
-        {
-            Set(p);
-            return false;
-        }
-    }
-
     public bool SubSelfWithMin(int value, int min)
     {
         if (_value - value <= min)
@@ -68,21 +53,6 @@ public class DataInt : Data<int>
         else
         {
             Set(_value - value);
-            return false;
-        }
-    }
-
-    public bool SubSelfWithLoop(int value, int max)
-    {
-        int p = _value - value;
-        if (p < 0)
-        {
-            Set(max + p);
-            return true;
-        }
-        else
-        {
-            Set(p);
             return false;
         }
     }
